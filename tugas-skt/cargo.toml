@@ -1,0 +1,43 @@
+[package]
+name = "tugas-skt"
+version = "0.1.0"
+authors = ["tugasSKT"]
+edition = "2021"
+resolver = "2"
+rust-version = "1.77"
+
+[[bin]]
+name = "tugas-skt"
+harness = false # do not use the built in cargo test harness -> avoid rust-analyzer errors
+
+[profile.release]
+opt-level = "s"
+
+[profile.dev]
+debug = true
+opt-level = "z"
+
+[features]
+default = []
+experimental = ["esp-idf-svc/experimental"]
+
+[dependencies]
+log = "0.4"
+anyhow = "1.0"
+esp-idf-svc = { version = "0.51", features = ["alloc"] }
+esp-idf-hal = "0.45"
+esp-idf-sys = { version = "0.36", features = ["native"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+heapless = "0.8"
+
+
+# Jika kamu nanti mau pakai embassy (async task)
+# esp-idf-svc = { version = "0.51", features = ["critical-section", "embassy-time-driver", "embassy-sync"] }
+# embassy-time = { version = "0.4.0", features = ["generic-queue-8"] }
+
+[build-dependencies]
+embuild = "0.33"
+
+[package.metadata.esp-idf]
+esp_idf_version = "v5.3.3"
