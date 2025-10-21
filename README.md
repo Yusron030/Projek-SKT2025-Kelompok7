@@ -1,161 +1,196 @@
-# 🧠 Proyek Sistem Kontrol Terdistribusi - Kelompok 7
+# 📡 Proyek Sistem Kontrol Terdistribusi — Kelompok 7
 
-## 📘 Deskripsi Proyek
-Pada proyek mata kuliah **Sistem Kontrol Terdistribusi**, kami dari **Kelompok 7** membuat sebuah sistem yang memiliki beberapa fitur seperti halnya **DCS (Distributed Control System)**.
+## Deskripsi Singkat
 
-Sistem ini dibangun menggunakan **ESP32 S3** yang terhubung dengan beberapa sensor dan aktuator melalui komunikasi **RS485 (Modbus)** dan dikontrol menggunakan bahasa pemrograman **Rust**.
-
----
-
-## ⚙️ Komponen yang Digunakan
-- **ESP32 S3**
-- **Sensor SHT20** (Suhu & Kelembapan)
-- **MAX485 RS485 TTL**
-- **Relay Module**
-- **Buzzer**
+Pada proyek mata kuliah **Sistem Kontrol Terdistribusi**, Kelompok 7 mengembangkan sebuah sistem yang meniru fungsi dasar **DCS (Distributed Control System)**. Sistem ini menggunakan **ESP32-S3** yang terhubung dengan beberapa sensor dan aktuator. Data sensor dikirim ke **InfluxDB** (lokal) dan **ThingsBoard** (cloud) untuk monitoring.
 
 ---
 
-## 💻 Instalasi dan Persiapan
+## 🔧 Perangkat Keras
 
-### 1️⃣ Install Template Proyek ESP32 untuk Rust
-Jalankan perintah berikut di terminal untuk membuat template proyek ESP32:
+* **ESP32-S3**
+* **Sensor SHT20** (suhu & kelembapan)
+* **MAX485 (RS485 ↔ TTL)**
+* **Relay module**
+* **Buzzer**
+
+---
+
+## 🛠️ Perangkat Lunak & Tools
+
+* Bahasa: **Rust**
+* Template: `esp-idf-template` (esp-rs)
+* Tools: `espup`, `espflash`
+* Backend monitoring: **InfluxDB (lokal)**, **ThingsBoard (demo cloud)**
+
+---
+
+## Langkah Persiapan & Instalasi
+
+1. **Buat project template**
 
 ```bash
 cargo generate --git https://github.com/esp-rs/esp-idf-template.git
-Kemudian pilih:
+# Pilih target: esp32s3
+# Pilih esp-idf version: 5.3
+```
 
-markdown
-Copy code
-> esp32s3
-> esp-idf version: 5.3 (recommended for stability)
-2️⃣ Instalasi Tools Pendukung
-Agar bahasa Rust dapat digunakan untuk memprogram ESP32, lakukan instalasi berikut:
+2. **Pasang tooling Rust untuk ESP32**
 
-bash
-Copy code
+```bash
 cargo install espup
 cargo install espflash
-📝 Keterangan:
+```
 
-espup digunakan untuk men-setup toolchain ESP-IDF agar kompatibel dengan Rust.
+3. **Inisialisasi toolchain ESP-IDF**
 
-espflash digunakan untuk mengirim program ke ESP32 via USB.
+```bash
+# jalankan espup (otomatis mengunduh dan men-setup toolchain esp-idf yang kompatibel)
+espup install
+```
 
-3️⃣ Struktur Proyek
-Setelah semua siap, kamu akan memiliki struktur proyek seperti berikut:
+> Catatan: Ikuti petunjuk `espup` untuk PATH dan variabel lingkungan jika diminta.
 
-css
-Copy code
-📂 proyek_esp32
- ┣ 📜 Cargo.toml
- ┣ 📜 main.rs
- ┗ 📂 src/
-    ┗ 📜 main.rs
-Pada file Cargo.toml, tambahkan dependencies yang dibutuhkan seperti untuk WiFi, InfluxDB, UART, dan Sensor SHT20.
+---
 
-🧠 Pemrograman main.rs
-Di dalam file main.rs, kita memprogram:
+## Struktur Proyek (contoh)
 
-Konektivitas WiFi
+```
+tugas-skt/
+├─ Cargo.toml
+├─ src/
+│  └─ main.rs
+└─ README.md
+```
 
-Koneksi ke InfluxDB
+Tambahkan dependency di `Cargo.toml` sesuai kebutuhan (WiFi, UART, sensor, MQTT/HTTP client, dsb.).
 
-Koneksi ke ThingsBoard
+---
 
-Pembacaan sensor melalui RS485
+## Contoh Perintah / Bash yang Sering Digunakan
 
-Kontrol aktuator (Relay dan Buzzer)
+```bash
+# Build project
+cargo build
 
-Contoh struktur dasar program:
+# Flash ke ESP32
+espflash /dev/ttyACM0 target/xtensa-esp32s3-espidf/release/<nama_bin>
 
-rust
-Copy code
+# (Jika menggunakan espflash via cargo)
+espflash --release /dev/ttyACM0
+```
+
+---
+
+## Panduan Pemrograman (ringkasan `main.rs`)
+
+Pada `main.rs` struktur umumnya meliputi:
+
+1. Inisialisasi hardware (UART/RS485, I2C untuk SHT20, GPIO untuk relay & buzzer)
+2. Konektivitas WiFi
+3. Koneksi ke InfluxDB (HTTP API)
+4. Koneksi ke ThingsBoard (MQTT)
+5. Pembacaan sensor melalui RS485 / I2C
+6. Logika kontrol aktuator (relay & buzzer)
+7. Pengiriman data ke InfluxDB dan ThingsBoard
+
+Contoh pseudocode:
+
+```rust
 fn main() {
-    // Inisialisasi WiFi
     init_wifi("SSID", "PASSWORD");
-
-    // Koneksi ke InfluxDB lokal
-    connect_influxdb("http://192.168.x.x:8086", "ORG_ID", "BUCKET", "TOKEN");
-
-    // Inisialisasi komunikasi UART RS485
     init_rs485();
+    init_i2c();
 
-    // Pembacaan data sensor SHT20
-    let data = read_sht20();
+    loop {
+        let sensor = read_sht20();
+        let modbus_data = read_rs485();
 
-    // Kirim data ke InfluxDB dan ThingsBoard
-    send_to_influxdb(data);
-    send_to_thingsboard(data);
+        send_to_influxdb(&sensor);
+        publish_thingsboard(&sensor);
 
-    // Kontrol relay & buzzer
-    control_actuator(data);
+        if sensor.temperature > 35.0 {
+            relay_on();
+            buzzer_on();
+        } else {
+            relay_off();
+            buzzer_off();
+        }
+
+        sleep_ms(1000);
+    }
 }
-🌐 Koneksi ke InfluxDB Lokal
-Agar ESP32 bisa mengirim data ke InfluxDB lokal, pastikan:
+```
 
-Gunakan ORG ID, Bucket, dan Token sesuai konfigurasi InfluxDB.
+---
 
-IP laptop dan ESP32 harus dalam satu subnet jaringan.
+## Konfigurasi InfluxDB (Lokal)
 
-Penjelasan Singkat:
-🔹 Subnet diibaratkan seperti satu kompleks perumahan (WiFi).
-Laptop dan ESP32 harus berada di kompleks yang sama, agar bisa saling berkomunikasi.
-Namun alamat rumah (IP address) harus berbeda supaya tidak “tabrakan”.
+Agar ESP32 dapat mengirim data ke InfluxDB lokal:
 
-Contoh konfigurasi:
+* Gunakan **ORG ID**, **Bucket**, dan **Token** sesuai konfigurasi InfluxDB.
+* Pastikan **IP laptop (InfluxDB)** dan **ESP32** berada dalam **subnet yang sama** (misal: `192.168.0.x`).
+* Pastikan IP berbeda (tidak boleh sama) agar tidak terjadi konflik alamat.
 
-rust
-Copy code
-let influx_url = "http://192.168.0.10:8086";
+Contoh variabel koneksi di kode:
+
+```rust
+let influx_url = "http://10.206.197.164:8086";
 let org = "my_org";
 let bucket = "sensor_data";
-let token = "my_secret_token";
-☁️ Koneksi ke ThingsBoard
-Untuk ThingsBoard, langkahnya cukup mudah:
+let token = "my_token";
+```
 
-Aktifkan Device di https://demo.thingsboard.io
+---
 
-Dapatkan Access Token dari device tersebut.
+## Konfigurasi ThingsBoard (demo.thingsboard.io)
 
-Masukkan token tersebut pada program main.rs.
+1. Buat atau aktifkan device pada `demo.thingsboard.io`.
+2. Ambil **Access Token** device.
+3. Masukkan token pada konfigurasi MQTT di `main.rs`.
 
-Contoh konfigurasi:
+Contoh singkat:
 
-rust
-Copy code
+```rust
 let thingsboard_host = "demo.thingsboard.io";
-let token = "YOUR_DEVICE_TOKEN";
-Kirim data menggunakan MQTT:
+let device_token = "DEVICE_TOKEN";
+publish_mqtt(thingsboard_host, device_token, payload);
+```
 
-rust
-Copy code
-send_to_thingsboard(thingsboard_host, token, data);
-🔔 Aktuator (Relay dan Buzzer)
-Setelah sensor terbaca dan data terkirim, ESP32 juga mengontrol Relay dan Buzzer untuk memberikan respon terhadap kondisi tertentu (misalnya suhu tinggi atau kelembapan rendah).
+---
 
-rust
-Copy code
-if suhu > 35.0 {
-    relay_on();
-    buzzer_on();
-} else {
-    relay_off();
-    buzzer_off();
-}
-📊 Hasil dan Monitoring
-Data dari sensor ditampilkan di InfluxDB (Grafana Dashboard) secara real-time.
+## Troubleshooting Singkat
 
-Data juga bisa dimonitor di ThingsBoard Cloud dengan tampilan grafik yang interaktif.
+* **InfluxDB unreachable**: cek IP, subnet, dan firewall (port 8086).
+* **MQTT tidak terkoneksi**: cek token, user/pass, serta koneksi WiFi.
+* **RS485 tidak baca sensor**: cek wiring A/B, level shifter, dan konfigurasi UART (baudrate, parity).
 
-👥 Anggota Kelompok 7
-Muhammad Yusron Maskur
+---
 
-[Nama Anggota 2]
+## Contoh Konfigurasi `Cargo.toml` (placeholder)
 
-[Nama Anggota 3]
+```toml
+[dependencies]
+# contoh dependency, silakan sesuaikan
+esp-idf-svc = "*"
+esp-idf-hal = "*"
+embedded-hal = "*"
+# dependency untuk mqtt/http/influx client sesuai kebutuhan
+```
 
-[Nama Anggota 4]
+---
 
-🧩 Kesimpulan
-Proyek ini berhasil mengimplementasikan konsep Distributed Control System (DCS) sederhana menggunakan ESP32 S3 dan Rust, dengan integrasi InfluxDB lokal dan ThingsBoard Cloud sebagai media monitoring data.
+## Anggota Kelompok
+
+* Adrian Yared Immanuel (2042221080)
+* Muhammad Yusron Maskur (2042231030)
+* Agus Wedi (2042231066)
+
+---
+
+## Lisensi
+
+Proyek ini dapat di-licence sesuai kesepakatan tim. (Contoh: MIT License)
+
+---
+
