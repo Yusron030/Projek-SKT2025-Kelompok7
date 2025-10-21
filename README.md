@@ -1,113 +1,97 @@
-# Projek-SKT2025-Kelompok7
-🌐 Sistem Kontrol Terdistribusi Berbasis ESP32 S3 dan Rust
+# 🚀 **Projek-SKT2025-Kelompok7**
 
-Proyek ini merupakan tugas dari mata kuliah Sistem Kontrol Terdistribusi (SKT).
-Kelompok 7 merancang sebuah sistem kontrol yang memiliki fitur serupa dengan Distributed Control System (DCS), dengan menggunakan ESP32 S3 sebagai pusat kendali utama.
+> 💡 *Proyek Sistem Kontrol Terdistribusi menggunakan ESP32 S3 dan Rust*
 
-⚙️ Komponen yang Digunakan
+---
 
-ESP32 S3
+## 🌐 **Deskripsi Proyek**
+Proyek ini merupakan tugas dari mata kuliah **Sistem Kontrol Terdistribusi (SKT)**.  
+Kelompok 7 merancang sebuah sistem kontrol yang memiliki fitur serupa dengan **Distributed Control System (DCS)**, dengan menggunakan **ESP32 S3** sebagai pusat kendali utama.
 
-Sensor SHT20 – untuk pengukuran suhu dan kelembapan
+---
 
-MAX485 RS485 TTL – komunikasi serial jarak jauh antar perangkat
+## ⚙️ **Komponen yang Digunakan**
 
-Relay – sebagai aktuator untuk mengendalikan beban
+| Komponen | Fungsi |
+|-----------|---------|
+| **ESP32 S3** | Mikrokontroler utama sebagai pusat kendali |
+| **Sensor SHT20** | Mengukur suhu dan kelembapan |
+| **MAX485 RS485 TTL** | Komunikasi serial jarak jauh antar perangkat |
+| **Relay** | Aktuator untuk mengendalikan beban listrik |
+| **Buzzer** | Indikator suara / alarm sistem |
 
-Buzzer – sebagai indikator suara
+---
 
-🧠 Bahasa Pemrograman
+## 🧠 **Bahasa Pemrograman**
+Proyek dikembangkan menggunakan **Rust**, dengan dukungan ekosistem **ESP-IDF**.
 
-Proyek ini dikembangkan menggunakan Rust, dengan bantuan ekosistem ESP-IDF.
-
-Langkah awal instalasi:
-
+### Instalasi awal:
+```bash
 cargo generate --git https://github.com/esp-rs/esp-idf-template.git
+Pilih ESP32 S3 dan gunakan versi ESP-IDF 5.3 untuk kestabilan.
 
+🔧 Langkah Instalasi & Konfigurasi
+Instal toolchain pendukung:
 
-Kemudian pilih chip ESP32-S3 dengan versi ESP-IDF 5.3 untuk memastikan kestabilan fitur.
-
-🔧 Instalasi dan Konfigurasi Lingkungan
-
-Instal ESP toolchain dan library pendukung:
-
+bash
+Copy code
 cargo install espup
 cargo install espflash
+Cek koneksi board:
 
-
-Pastikan Rust dapat mendeteksi board ESP32:
-
+bash
+Copy code
 espflash board-info
+Tambahkan dependensi di Cargo.toml
 
-
-Konfigurasi proyek:
-Tambahkan dependensi yang diperlukan pada Cargo.toml, seperti:
-
-Library untuk WiFi
+WiFi dan TCP/IP
 
 Modul InfluxDB
 
 Modul UART RS485
 
-Modul sensor SHT20
+Library sensor & aktuator
 
-Modul relay dan buzzer
+💻 Struktur Program (main.rs)
+Program utama mengatur:
 
-💻 Pemrograman main.rs
+Inisialisasi koneksi WiFi
 
-File main.rs berisi:
+Pengiriman data ke InfluxDB
 
-Inisialisasi WiFi
+Integrasi dengan ThingsBoard
 
-Koneksi ke InfluxDB lokal
+Pembacaan sensor via RS485
 
-Integrasi dengan ThingsBoard (IoT Platform)
-
-Pembacaan data sensor melalui RS485
-
-Kontrol relay dan buzzer sebagai aktuator
+Kontrol Relay dan Buzzer
 
 📡 Koneksi ke InfluxDB Lokal
-
 Agar ESP32 dapat mengirim data ke InfluxDB, pastikan:
 
-Anda sudah memiliki ORG ID, Bucket, dan Token dari InfluxDB.
+Memiliki ORG ID, Bucket, dan Token
 
-IP laptop (server) dan ESP32 berada pada subnet yang sama.
-Misalnya:
+IP laptop (server) dan ESP32 berada pada subnet yang sama
 
-Laptop: 192.168.1.10
+🏠 Analogi subnet:
+Laptop dan ESP32 harus berada dalam “komplek perumahan WiFi” yang sama.
+Namun, alamat rumahnya (IP) harus berbeda agar tidak tabrakan.
 
-ESP32: 192.168.1.20
-
-Keduanya harus terhubung ke WiFi yang sama agar komunikasi berhasil.
-
-Analogi subnet:
-
-Subnet bisa diibaratkan seperti satu komplek perumahan (WiFi).
-Laptop dan ESP32 harus berada di komplek yang sama agar bisa berkomunikasi.
-Namun, alamat rumahnya (IP) harus berbeda agar tidak saling bertabrakan.
-
-☁️ Integrasi dengan ThingsBoard
-
+☁️ Integrasi ThingsBoard
 Buka demo.thingsboard.io
-.
 
-Aktifkan device dan dapatkan access token.
+Aktifkan device dan salin access token
 
-Masukkan token atau kredensial MQTT (username dan password) ke dalam kode main.rs.
+Masukkan token ke dalam main.rs
 
-Jalankan program — data sensor akan otomatis tampil di dashboard ThingsBoard.
+Jalankan program untuk menampilkan hasil sensor di dashboard ThingsBoard
 
 🔌 Fitur Utama
-
-✅ Pembacaan data sensor suhu & kelembapan (SHT20)
-✅ Komunikasi data melalui RS485 (MAX485)
+✅ Pembacaan data suhu & kelembapan (SHT20)
+✅ Komunikasi RS485 antar perangkat
 ✅ Pengiriman data ke InfluxDB lokal
-✅ Monitoring online melalui ThingsBoard IoT
-✅ Kontrol aktuator (Relay & Buzzer)
+✅ Monitoring online melalui ThingsBoard
+✅ Kontrol relay dan buzzer
 
 👥 Tim Kelompok 7
-
 Mata Kuliah Sistem Kontrol Terdistribusi (SKT)
-Jurusan Teknik — 2025
+📍 Tahun Akademik 2025
