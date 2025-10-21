@@ -93,5 +93,8 @@ Jalankan program untuk menampilkan hasil sensor di dashboard ThingsBoard
 ✅ Kontrol relay dan buzzer
 
 👥 Tim Kelompok 7
+- Adrian Yared Immanuel (2042221080)
+- Muhammad Yusron Maskur (2042231030
+- Agus Wedi (2042231066)
 Mata Kuliah Sistem Kontrol Terdistribusi (SKT)
 📍 Tahun Akademik 2025
