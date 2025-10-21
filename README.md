@@ -27,7 +27,9 @@ Proyek dikembangkan menggunakan **Rust**, dengan dukungan ekosistem **ESP-IDF**.
 
 ### Instalasi awal:
 ```bash
+---
 cargo generate --git https://github.com/esp-rs/esp-idf-template.git
+---
 Pilih ESP32 S3 dan gunakan versi ESP-IDF 5.3 untuk kestabilan.
 
 🔧 Langkah Instalasi & Konfigurasi
