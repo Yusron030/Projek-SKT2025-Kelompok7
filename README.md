@@ -1,100 +1,161 @@
-# 🚀 **Projek-SKT2025-Kelompok7**
+# 🧠 Proyek Sistem Kontrol Terdistribusi - Kelompok 7
 
-> 💡 *Proyek Sistem Kontrol Terdistribusi menggunakan ESP32 S3 dan Rust*
+## 📘 Deskripsi Proyek
+Pada proyek mata kuliah **Sistem Kontrol Terdistribusi**, kami dari **Kelompok 7** membuat sebuah sistem yang memiliki beberapa fitur seperti halnya **DCS (Distributed Control System)**.
 
----
-
-## 🌐 **Deskripsi Proyek**
-Proyek ini merupakan tugas dari mata kuliah **Sistem Kontrol Terdistribusi (SKT)**.  
-Kelompok 7 merancang sebuah sistem kontrol yang memiliki fitur serupa dengan **Distributed Control System (DCS)**, dengan menggunakan **ESP32 S3** sebagai pusat kendali utama.
+Sistem ini dibangun menggunakan **ESP32 S3** yang terhubung dengan beberapa sensor dan aktuator melalui komunikasi **RS485 (Modbus)** dan dikontrol menggunakan bahasa pemrograman **Rust**.
 
 ---
 
-## ⚙️ **Komponen yang Digunakan**
-
-| Komponen | Fungsi |
-|-----------|---------|
-| **ESP32 S3** | Mikrokontroler utama sebagai pusat kendali |
-| **Sensor SHT20** | Mengukur suhu dan kelembapan |
-| **MAX485 RS485 TTL** | Komunikasi serial jarak jauh antar perangkat |
-| **Relay** | Aktuator untuk mengendalikan beban listrik |
-| **Buzzer** | Indikator suara / alarm sistem |
+## ⚙️ Komponen yang Digunakan
+- **ESP32 S3**
+- **Sensor SHT20** (Suhu & Kelembapan)
+- **MAX485 RS485 TTL**
+- **Relay Module**
+- **Buzzer**
 
 ---
 
-## 🧠 **Bahasa Pemrograman**
-Proyek dikembangkan menggunakan **Rust**, dengan dukungan ekosistem **ESP-IDF**.
+## 💻 Instalasi dan Persiapan
 
-### Instalasi awal:
+### 1️⃣ Install Template Proyek ESP32 untuk Rust
+Jalankan perintah berikut di terminal untuk membuat template proyek ESP32:
+
 ```bash
 cargo generate --git https://github.com/esp-rs/esp-idf-template.git
-Pilih ESP32 S3 dan gunakan versi ESP-IDF 5.3 untuk kestabilan.
+Kemudian pilih:
 
-🔧 Langkah Instalasi & Konfigurasi
-Instal toolchain pendukung:
+markdown
+Copy code
+> esp32s3
+> esp-idf version: 5.3 (recommended for stability)
+2️⃣ Instalasi Tools Pendukung
+Agar bahasa Rust dapat digunakan untuk memprogram ESP32, lakukan instalasi berikut:
 
 bash
 Copy code
 cargo install espup
 cargo install espflash
-Cek koneksi board:
+📝 Keterangan:
 
-bash
+espup digunakan untuk men-setup toolchain ESP-IDF agar kompatibel dengan Rust.
+
+espflash digunakan untuk mengirim program ke ESP32 via USB.
+
+3️⃣ Struktur Proyek
+Setelah semua siap, kamu akan memiliki struktur proyek seperti berikut:
+
+css
 Copy code
-espflash board-info
-Tambahkan dependensi di Cargo.toml
+📂 proyek_esp32
+ ┣ 📜 Cargo.toml
+ ┣ 📜 main.rs
+ ┗ 📂 src/
+    ┗ 📜 main.rs
+Pada file Cargo.toml, tambahkan dependencies yang dibutuhkan seperti untuk WiFi, InfluxDB, UART, dan Sensor SHT20.
 
-WiFi dan TCP/IP
+🧠 Pemrograman main.rs
+Di dalam file main.rs, kita memprogram:
 
-Modul InfluxDB
+Konektivitas WiFi
 
-Modul UART RS485
+Koneksi ke InfluxDB
 
-Library sensor & aktuator
+Koneksi ke ThingsBoard
 
-💻 Struktur Program (main.rs)
-Program utama mengatur:
+Pembacaan sensor melalui RS485
 
-Inisialisasi koneksi WiFi
+Kontrol aktuator (Relay dan Buzzer)
 
-Pengiriman data ke InfluxDB
+Contoh struktur dasar program:
 
-Integrasi dengan ThingsBoard
+rust
+Copy code
+fn main() {
+    // Inisialisasi WiFi
+    init_wifi("SSID", "PASSWORD");
 
-Pembacaan sensor via RS485
+    // Koneksi ke InfluxDB lokal
+    connect_influxdb("http://192.168.x.x:8086", "ORG_ID", "BUCKET", "TOKEN");
 
-Kontrol Relay dan Buzzer
+    // Inisialisasi komunikasi UART RS485
+    init_rs485();
 
-📡 Koneksi ke InfluxDB Lokal
-Agar ESP32 dapat mengirim data ke InfluxDB, pastikan:
+    // Pembacaan data sensor SHT20
+    let data = read_sht20();
 
-Memiliki ORG ID, Bucket, dan Token
+    // Kirim data ke InfluxDB dan ThingsBoard
+    send_to_influxdb(data);
+    send_to_thingsboard(data);
 
-IP laptop (server) dan ESP32 berada pada subnet yang sama
+    // Kontrol relay & buzzer
+    control_actuator(data);
+}
+🌐 Koneksi ke InfluxDB Lokal
+Agar ESP32 bisa mengirim data ke InfluxDB lokal, pastikan:
 
-🏠 Analogi subnet:
-Laptop dan ESP32 harus berada dalam “komplek perumahan WiFi” yang sama.
-Namun, alamat rumahnya (IP) harus berbeda agar tidak tabrakan.
+Gunakan ORG ID, Bucket, dan Token sesuai konfigurasi InfluxDB.
 
-☁️ Integrasi ThingsBoard
-Buka demo.thingsboard.io
+IP laptop dan ESP32 harus dalam satu subnet jaringan.
 
-Aktifkan device dan salin access token
+Penjelasan Singkat:
+🔹 Subnet diibaratkan seperti satu kompleks perumahan (WiFi).
+Laptop dan ESP32 harus berada di kompleks yang sama, agar bisa saling berkomunikasi.
+Namun alamat rumah (IP address) harus berbeda supaya tidak “tabrakan”.
 
-Masukkan token ke dalam main.rs
+Contoh konfigurasi:
 
-Jalankan program untuk menampilkan hasil sensor di dashboard ThingsBoard
+rust
+Copy code
+let influx_url = "http://192.168.0.10:8086";
+let org = "my_org";
+let bucket = "sensor_data";
+let token = "my_secret_token";
+☁️ Koneksi ke ThingsBoard
+Untuk ThingsBoard, langkahnya cukup mudah:
 
-🔌 Fitur Utama
-✅ Pembacaan data suhu & kelembapan (SHT20)
-✅ Komunikasi RS485 antar perangkat
-✅ Pengiriman data ke InfluxDB lokal
-✅ Monitoring online melalui ThingsBoard
-✅ Kontrol relay dan buzzer
+Aktifkan Device di https://demo.thingsboard.io
 
-👥 Tim Kelompok 7
-- Adrian Yared Immanuel (2042221080)
-- Muhammad Yusron Maskur (2042231030
-- Agus Wedi (2042231066)
-Mata Kuliah Sistem Kontrol Terdistribusi (SKT)
-📍 Tahun Akademik 2025
+Dapatkan Access Token dari device tersebut.
+
+Masukkan token tersebut pada program main.rs.
+
+Contoh konfigurasi:
+
+rust
+Copy code
+let thingsboard_host = "demo.thingsboard.io";
+let token = "YOUR_DEVICE_TOKEN";
+Kirim data menggunakan MQTT:
+
+rust
+Copy code
+send_to_thingsboard(thingsboard_host, token, data);
+🔔 Aktuator (Relay dan Buzzer)
+Setelah sensor terbaca dan data terkirim, ESP32 juga mengontrol Relay dan Buzzer untuk memberikan respon terhadap kondisi tertentu (misalnya suhu tinggi atau kelembapan rendah).
+
+rust
+Copy code
+if suhu > 35.0 {
+    relay_on();
+    buzzer_on();
+} else {
+    relay_off();
+    buzzer_off();
+}
+📊 Hasil dan Monitoring
+Data dari sensor ditampilkan di InfluxDB (Grafana Dashboard) secara real-time.
+
+Data juga bisa dimonitor di ThingsBoard Cloud dengan tampilan grafik yang interaktif.
+
+👥 Anggota Kelompok 7
+Muhammad Yusron Maskur
+
+[Nama Anggota 2]
+
+[Nama Anggota 3]
+
+[Nama Anggota 4]
+
+🧩 Kesimpulan
+Proyek ini berhasil mengimplementasikan konsep Distributed Control System (DCS) sederhana menggunakan ESP32 S3 dan Rust, dengan integrasi InfluxDB lokal dan ThingsBoard Cloud sebagai media monitoring data.
